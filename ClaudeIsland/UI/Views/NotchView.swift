@@ -201,6 +201,7 @@ struct NotchView: View {
             handlePendingSessionsChange(sessions)
         }
         .onChange(of: sessionMonitor.instances) { _, instances in
+            viewModel.sessionCount = instances.count
             handleProcessingChange()
             handleWaitingForInputChange(instances)
         }
