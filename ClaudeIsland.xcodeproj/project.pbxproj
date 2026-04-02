@@ -11,7 +11,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		FD33FD5D2EDF32D7002A6548 /* Claude Island.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Claude Island.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD33FD5D2EDF32D7002A6548 /* Notch Island.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Notch Island.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -58,7 +58,7 @@
 		FD33FD5E2EDF32D7002A6548 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FD33FD5D2EDF32D7002A6548 /* Claude Island.app */,
+				FD33FD5D2EDF32D7002A6548 /* Notch Island.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -86,7 +86,7 @@
 				FD33FD722EDF32D7002A6548 /* Markdown */,
 			);
 			productName = ClaudeIsland;
-			productReference = FD33FD5D2EDF32D7002A6548 /* Claude Island.app */;
+			productReference = FD33FD5D2EDF32D7002A6548 /* Notch Island.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -284,7 +284,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ClaudeIsland/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Claude Island";
+				INFOPLIST_KEY_CFBundleDisplayName = "Notch Island";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2025. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -293,7 +293,7 @@
 				);
 				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.robertflynn.NotchIsland;
-				PRODUCT_NAME = "Claude Island";
+				PRODUCT_NAME = "Notch Island";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -321,7 +321,7 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ClaudeIsland/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "Claude Island";
+				INFOPLIST_KEY_CFBundleDisplayName = "Notch Island";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright 2025. All rights reserved.";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -330,7 +330,7 @@
 				);
 				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.robertflynn.NotchIsland;
-				PRODUCT_NAME = "Claude Island";
+				PRODUCT_NAME = "Notch Island";
 				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
