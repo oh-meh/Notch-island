@@ -153,10 +153,22 @@ struct InstanceRow: View {
 
             // Text content
             VStack(alignment: .leading, spacing: 2) {
-                Text(session.displayTitle)
-                    .font(.system(size: 13, weight: .medium))
-                    .foregroundColor(.white)
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text(session.displayTitle)
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+
+                    if session.agentType == .codex {
+                        Text("CODEX")
+                            .font(.system(size: 8, weight: .bold, design: .monospaced))
+                            .foregroundColor(.cyan.opacity(0.8))
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1)
+                            .background(.cyan.opacity(0.12))
+                            .clipShape(RoundedRectangle(cornerRadius: 3))
+                    }
+                }
 
                 // Show tool call when waiting for approval, otherwise last activity
                 if isWaitingForApproval, let toolName = session.pendingToolName {
@@ -243,7 +255,7 @@ struct InstanceRow: View {
                     }
                 }
                 .transition(.opacity.combined(with: .scale(scale: 0.9)))
-            } else if isWaitingForApproval {
+            } else if isWaitingForApproval && session.supportsPermissions {
                 InlineApprovalButtons(
                     onChat: onChat,
                     onApprove: onApprove,

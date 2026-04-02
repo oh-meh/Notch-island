@@ -17,6 +17,7 @@ struct NotchMenuView: View {
     @ObservedObject private var screenSelector = ScreenSelector.shared
     @ObservedObject private var soundSelector = SoundSelector.shared
     @State private var hooksInstalled: Bool = false
+    @State private var codexHooksInstalled: Bool = false
     @State private var launchAtLogin: Bool = false
 
     var body: some View {
@@ -71,6 +72,20 @@ struct NotchMenuView: View {
                 } else {
                     HookInstaller.installIfNeeded()
                     hooksInstalled = true
+                }
+            }
+
+            MenuToggleRow(
+                icon: "arrow.triangle.2.circlepath",
+                label: "Codex Hooks",
+                isOn: codexHooksInstalled
+            ) {
+                if codexHooksInstalled {
+                    HookInstaller.uninstallCodex()
+                    codexHooksInstalled = false
+                } else {
+                    HookInstaller.installCodexIfNeeded()
+                    codexHooksInstalled = true
                 }
             }
 
@@ -142,6 +157,7 @@ struct NotchMenuView: View {
 
     private func refreshStates() {
         hooksInstalled = HookInstaller.isInstalled()
+        codexHooksInstalled = HookInstaller.isCodexInstalled()
         launchAtLogin = SMAppService.mainApp.status == .enabled
         screenSelector.refreshScreens()
     }

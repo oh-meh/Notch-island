@@ -18,6 +18,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         HookInstaller.installIfNeeded()
+        HookInstaller.installCodexIfNeeded()
         NSApplication.shared.setActivationPolicy(.accessory)
 
         windowManager = WindowManager()

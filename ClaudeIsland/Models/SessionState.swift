@@ -16,6 +16,7 @@ struct SessionState: Equatable, Identifiable, Sendable {
     let sessionId: String
     let cwd: String
     let projectName: String
+    let agentType: AgentType
 
     // MARK: - Instance Metadata
 
@@ -64,10 +65,14 @@ struct SessionState: Equatable, Identifiable, Sendable {
 
     // MARK: - Initialization
 
+    /// Whether this agent supports interactive permission approval
+    var supportsPermissions: Bool { agentType == .claudeCode }
+
     nonisolated init(
         sessionId: String,
         cwd: String,
         projectName: String? = nil,
+        agentType: AgentType = .claudeCode,
         pid: Int? = nil,
         tty: String? = nil,
         isInTmux: Bool = false,
@@ -86,6 +91,7 @@ struct SessionState: Equatable, Identifiable, Sendable {
         self.sessionId = sessionId
         self.cwd = cwd
         self.projectName = projectName ?? URL(fileURLWithPath: cwd).lastPathComponent
+        self.agentType = agentType
         self.pid = pid
         self.tty = tty
         self.isInTmux = isInTmux

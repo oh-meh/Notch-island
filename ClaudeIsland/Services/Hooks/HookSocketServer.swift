@@ -12,7 +12,7 @@ import os.log
 /// Logger for hook socket server
 private let logger = Logger(subsystem: "com.claudeisland", category: "Hooks")
 
-/// Event received from Claude Code hooks
+/// Event received from Claude Code or Codex hooks
 struct HookEvent: Codable, Sendable {
     let sessionId: String
     let cwd: String
@@ -25,6 +25,7 @@ struct HookEvent: Codable, Sendable {
     let toolUseId: String?
     let notificationType: String?
     let message: String?
+    let agentType: String?
 
     enum CodingKeys: String, CodingKey {
         case sessionId = "session_id"
@@ -33,10 +34,11 @@ struct HookEvent: Codable, Sendable {
         case toolUseId = "tool_use_id"
         case notificationType = "notification_type"
         case message
+        case agentType = "agent_type"
     }
 
     /// Create a copy with updated toolUseId
-    init(sessionId: String, cwd: String, event: String, status: String, pid: Int?, tty: String?, tool: String?, toolInput: [String: AnyCodable]?, toolUseId: String?, notificationType: String?, message: String?) {
+    init(sessionId: String, cwd: String, event: String, status: String, pid: Int?, tty: String?, tool: String?, toolInput: [String: AnyCodable]?, toolUseId: String?, notificationType: String?, message: String?, agentType: String? = nil) {
         self.sessionId = sessionId
         self.cwd = cwd
         self.event = event
@@ -48,6 +50,13 @@ struct HookEvent: Codable, Sendable {
         self.toolUseId = toolUseId
         self.notificationType = notificationType
         self.message = message
+        self.agentType = agentType
+    }
+
+    /// Resolved agent type (nil defaults to Claude Code for backwards compatibility)
+    var resolvedAgentType: AgentType {
+        if agentType == "codex" { return .codex }
+        return .claudeCode
     }
 
     var sessionPhase: SessionPhase {
@@ -76,9 +85,9 @@ struct HookEvent: Codable, Sendable {
         }
     }
 
-    /// Whether this event expects a response (permission request)
+    /// Whether this event expects a response (permission request, Claude Code only)
     nonisolated var expectsResponse: Bool {
-        event == "PermissionRequest" && status == "waiting_for_approval"
+        agentType != "codex" && event == "PermissionRequest" && status == "waiting_for_approval"
     }
 }
 
@@ -447,7 +456,8 @@ class HookSocketServer {
                 toolInput: event.toolInput,
                 toolUseId: toolUseId,  // Use resolved toolUseId
                 notificationType: event.notificationType,
-                message: event.message
+                message: event.message,
+                agentType: event.agentType
             )
 
             let pending = PendingPermission(
