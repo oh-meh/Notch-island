@@ -11,7 +11,7 @@ import SwiftUI
 
 class NotchWindowController: NSWindowController {
     let viewModel: NotchViewModel
-    private let screen: NSScreen
+    let screen: NSScreen
     private var cancellables = Set<AnyCancellable>()
 
     init(screen: NSScreen) {
