@@ -78,8 +78,8 @@ class NotchViewModel: ObservableObject {
                 height: 420 + screenSelector.expandedPickerHeight + soundSelector.expandedPickerHeight
             )
         case .instances:
-            // ~56px per row + 8px VStack padding + 40px header + 16px outer padding
-            let rowHeight: CGFloat = 56
+            // ~72px per row (with context bar) + 8px VStack padding + 40px header + 16px outer padding
+            let rowHeight: CGFloat = 72
             let count = max(sessionCount, 1) // at least 1 for empty state
             let contentHeight = CGFloat(count) * rowHeight + 64
             let maxHeight = screenRect.height * 0.4

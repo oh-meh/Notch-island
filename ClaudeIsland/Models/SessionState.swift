@@ -48,6 +48,10 @@ struct SessionState: Equatable, Identifiable, Sendable {
 
     var conversationInfo: ConversationInfo
 
+    // MARK: - Context Window Usage (Claude Code only, via statusLine API)
+
+    var contextUsage: ContextUsage?
+
     // MARK: - Clear Reconciliation
 
     /// When true, the next file update should reconcile chatItems with parser state

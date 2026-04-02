@@ -32,6 +32,103 @@ struct HookInstaller {
         }
 
         updateSettings(at: settings)
+        installStatusLineIfNeeded(settingsURL: settings, hooksDir: hooksDir)
+    }
+
+    // MARK: - StatusLine
+
+    /// Install statusLine script and register in settings.json (chains to existing if present)
+    private static func installStatusLineIfNeeded(settingsURL: URL, hooksDir: URL) {
+        let statusScript = hooksDir.appendingPathComponent("claude-island-status.py")
+        let originalCmdFile = hooksDir.appendingPathComponent(".original-statusline-command")
+
+        // Copy bundled script
+        if let bundled = Bundle.main.url(forResource: "claude-island-status", withExtension: "py") {
+            try? FileManager.default.removeItem(at: statusScript)
+            try? FileManager.default.copyItem(at: bundled, to: statusScript)
+            try? FileManager.default.setAttributes(
+                [.posixPermissions: 0o755],
+                ofItemAtPath: statusScript.path
+            )
+        }
+
+        // Read current settings
+        var json: [String: Any] = [:]
+        if let data = try? Data(contentsOf: settingsURL),
+           let existing = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+            json = existing
+        }
+
+        let python = detectPython()
+        let ourCommand = "\(python) ~/.claude/hooks/claude-island-status.py"
+
+        // Check for existing statusLine config
+        if let existing = json["statusLine"] as? [String: Any],
+           let existingCmd = existing["command"] as? String,
+           !existingCmd.contains("claude-island-status.py") {
+            // User has their own statusLine — chain to it
+            try? existingCmd.write(to: originalCmdFile, atomically: true, encoding: .utf8)
+
+            let escapedCmd = existingCmd.replacingOccurrences(of: "'", with: "'\\''")
+            json["statusLine"] = [
+                "type": "command",
+                "command": "NOTCH_ISLAND_CHAIN_CMD='\(escapedCmd)' \(ourCommand)"
+            ] as [String: Any]
+        } else if let existing = json["statusLine"] as? [String: Any],
+                  let existingCmd = existing["command"] as? String,
+                  existingCmd.contains("claude-island-status.py") {
+            // Already installed — skip
+            return
+        } else {
+            // No existing statusLine — install ours directly
+            json["statusLine"] = [
+                "type": "command",
+                "command": ourCommand
+            ] as [String: Any]
+        }
+
+        if let data = try? JSONSerialization.data(
+            withJSONObject: json,
+            options: [.prettyPrinted, .sortedKeys]
+        ) {
+            try? data.write(to: settingsURL)
+        }
+    }
+
+    /// Remove statusLine config and restore original if one was chained
+    static func uninstallStatusLine() {
+        let claudeDir = FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent(".claude")
+        let hooksDir = claudeDir.appendingPathComponent("hooks")
+        let statusScript = hooksDir.appendingPathComponent("claude-island-status.py")
+        let originalCmdFile = hooksDir.appendingPathComponent(".original-statusline-command")
+        let settings = claudeDir.appendingPathComponent("settings.json")
+
+        try? FileManager.default.removeItem(at: statusScript)
+
+        guard let data = try? Data(contentsOf: settings),
+              var json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+            return
+        }
+
+        // Restore original statusLine if we saved one
+        if let originalCmd = try? String(contentsOf: originalCmdFile, encoding: .utf8),
+           !originalCmd.isEmpty {
+            json["statusLine"] = [
+                "type": "command",
+                "command": originalCmd
+            ] as [String: Any]
+            try? FileManager.default.removeItem(at: originalCmdFile)
+        } else {
+            json.removeValue(forKey: "statusLine")
+        }
+
+        if let data = try? JSONSerialization.data(
+            withJSONObject: json,
+            options: [.prettyPrinted, .sortedKeys]
+        ) {
+            try? data.write(to: settings)
+        }
     }
 
     private static func updateSettings(at settingsURL: URL) {

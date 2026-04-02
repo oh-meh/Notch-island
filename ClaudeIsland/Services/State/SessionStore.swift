@@ -115,6 +115,23 @@ actor SessionStore {
     // MARK: - Hook Event Processing
 
     private func processHookEvent(_ event: HookEvent) async {
+        // StatusUpdate events only update context usage, not phase/tools
+        if event.event == "StatusUpdate" {
+            guard var session = sessions[event.sessionId] else { return }
+            session.contextUsage = ContextUsage(
+                contextWindowSize: event.ctxWindowSize ?? 200_000,
+                usedPercentage: event.ctxUsedPercentage ?? 0,
+                inputTokens: event.ctxInputTokens ?? 0,
+                outputTokens: event.ctxOutputTokens ?? 0,
+                totalCostUsd: event.ctxTotalCostUsd ?? 0,
+                modelName: event.ctxModelName
+            )
+            session.lastActivity = Date()
+            sessions[event.sessionId] = session
+            publishState()
+            return
+        }
+
         let sessionId = event.sessionId
         let isNewSession = sessions[sessionId] == nil
         var session = sessions[sessionId] ?? createSession(from: event)

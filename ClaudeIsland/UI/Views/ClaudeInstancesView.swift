@@ -234,6 +234,37 @@ struct InstanceRow: View {
                         .foregroundColor(.white.opacity(0.4))
                         .lineLimit(1)
                 }
+
+                // Context window usage bar (Claude Code only)
+                if let ctx = session.contextUsage {
+                    HStack(spacing: 6) {
+                        // Progress bar
+                        GeometryReader { geo in
+                            ZStack(alignment: .leading) {
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(Color.white.opacity(0.08))
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(ctx.usageColor)
+                                    .frame(width: geo.size.width * min(ctx.usedPercentage / 100, 1.0))
+                            }
+                        }
+                        .frame(width: 60, height: 4)
+
+                        Text(ctx.formattedPercentage)
+                            .font(.system(size: 9, weight: .medium, design: .monospaced))
+                            .foregroundColor(ctx.usageColor)
+
+                        if let model = ctx.modelName {
+                            Text(model)
+                                .font(.system(size: 9, design: .monospaced))
+                                .foregroundColor(.white.opacity(0.3))
+                        }
+
+                        Text(ctx.formattedCost)
+                            .font(.system(size: 9, design: .monospaced))
+                            .foregroundColor(.white.opacity(0.3))
+                    }
+                }
             }
 
             Spacer(minLength: 0)

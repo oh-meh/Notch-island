@@ -27,6 +27,15 @@ struct HookEvent: Codable, Sendable {
     let message: String?
     let agentType: String?
 
+    // Context window fields (from StatusUpdate events via statusLine API)
+    let ctxWindowSize: Int?
+    let ctxUsedPercentage: Double?
+    let ctxInputTokens: Int?
+    let ctxOutputTokens: Int?
+    let ctxTotalCostUsd: Double?
+    let ctxModelId: String?
+    let ctxModelName: String?
+
     enum CodingKeys: String, CodingKey {
         case sessionId = "session_id"
         case cwd, event, status, pid, tty, tool
@@ -35,10 +44,17 @@ struct HookEvent: Codable, Sendable {
         case notificationType = "notification_type"
         case message
         case agentType = "agent_type"
+        case ctxWindowSize = "ctx_window_size"
+        case ctxUsedPercentage = "ctx_used_percentage"
+        case ctxInputTokens = "ctx_input_tokens"
+        case ctxOutputTokens = "ctx_output_tokens"
+        case ctxTotalCostUsd = "ctx_total_cost_usd"
+        case ctxModelId = "ctx_model_id"
+        case ctxModelName = "ctx_model_name"
     }
 
     /// Create a copy with updated toolUseId
-    init(sessionId: String, cwd: String, event: String, status: String, pid: Int?, tty: String?, tool: String?, toolInput: [String: AnyCodable]?, toolUseId: String?, notificationType: String?, message: String?, agentType: String? = nil) {
+    init(sessionId: String, cwd: String, event: String, status: String, pid: Int?, tty: String?, tool: String?, toolInput: [String: AnyCodable]?, toolUseId: String?, notificationType: String?, message: String?, agentType: String? = nil, ctxWindowSize: Int? = nil, ctxUsedPercentage: Double? = nil, ctxInputTokens: Int? = nil, ctxOutputTokens: Int? = nil, ctxTotalCostUsd: Double? = nil, ctxModelId: String? = nil, ctxModelName: String? = nil) {
         self.sessionId = sessionId
         self.cwd = cwd
         self.event = event
@@ -51,6 +67,13 @@ struct HookEvent: Codable, Sendable {
         self.notificationType = notificationType
         self.message = message
         self.agentType = agentType
+        self.ctxWindowSize = ctxWindowSize
+        self.ctxUsedPercentage = ctxUsedPercentage
+        self.ctxInputTokens = ctxInputTokens
+        self.ctxOutputTokens = ctxOutputTokens
+        self.ctxTotalCostUsd = ctxTotalCostUsd
+        self.ctxModelId = ctxModelId
+        self.ctxModelName = ctxModelName
     }
 
     /// Resolved agent type (nil defaults to Claude Code for backwards compatibility)
