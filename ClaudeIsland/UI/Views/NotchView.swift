@@ -22,9 +22,11 @@ struct NotchView: View {
     @State private var previousPendingIds: Set<String> = []
     @State private var previousWaitingForInputIds: Set<String> = []
     @State private var waitingForInputTimestamps: [String: Date] = [:]  // sessionId -> when it entered waitingForInput
+    @State private var expandedApprovalIds: Set<String> = []  // toolUseIds we've already auto-expanded for
     @State private var isVisible: Bool = false
     @State private var isHovering: Bool = false
     @State private var isBouncing: Bool = false
+    @State private var bounceOffset: CGFloat = 0
 
     @Namespace private var activityNamespace
 
@@ -171,6 +173,8 @@ struct NotchView: View {
                     .animation(.smooth, value: hasPendingPermission)
                     .animation(.smooth, value: hasWaitingForInput)
                     .animation(.spring(response: 0.3, dampingFraction: 0.5), value: isBouncing)
+                    .offset(y: bounceOffset)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.3), value: bounceOffset)
                     .contentShape(Rectangle())
                     .onHover { hovering in
                         withAnimation(.spring(response: 0.38, dampingFraction: 0.8)) {
@@ -204,6 +208,7 @@ struct NotchView: View {
             viewModel.sessionCount = instances.count
             handleProcessingChange()
             handleWaitingForInputChange(instances)
+            handleApprovalChange(instances)
         }
     }
 
@@ -416,6 +421,33 @@ struct NotchView: View {
         }
 
         previousPendingIds = currentIds
+    }
+
+    private func handleApprovalChange(_ instances: [SessionState]) {
+        // Collect toolUseIds for all current approval requests
+        let currentApprovalIds = Set(instances.compactMap { $0.activePermission?.toolUseId })
+
+        // Find new approval requests we haven't auto-expanded for yet
+        let newApprovalIds = currentApprovalIds.subtracting(expandedApprovalIds)
+
+        if !newApprovalIds.isEmpty {
+            // Auto-expand the notch to show approval buttons
+            if viewModel.status != .opened {
+                viewModel.notchOpen(reason: .notification)
+            }
+
+            // Bounce to catch the user's eye
+            bounceOffset = 8
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                bounceOffset = 0
+            }
+
+            // Mark these as handled so we don't re-expand if user closes
+            expandedApprovalIds.formUnion(newApprovalIds)
+        }
+
+        // Clean up IDs for approvals that are no longer active
+        expandedApprovalIds = expandedApprovalIds.intersection(currentApprovalIds)
     }
 
     private func handleWaitingForInputChange(_ instances: [SessionState]) {
