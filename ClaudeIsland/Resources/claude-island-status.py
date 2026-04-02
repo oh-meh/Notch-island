@@ -7,6 +7,7 @@ Claude Island StatusLine Script
 """
 import json
 import os
+import shlex
 import socket
 import subprocess
 import sys
@@ -61,8 +62,8 @@ def main():
     if chain_cmd:
         try:
             result = subprocess.run(
-                chain_cmd,
-                shell=True,
+                shlex.split(chain_cmd),
+                shell=False,
                 input=raw_input,
                 capture_output=True,
                 text=True,

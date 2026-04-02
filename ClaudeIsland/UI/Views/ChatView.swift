@@ -1058,6 +1058,7 @@ struct ChatApprovalBar: View {
     @State private var showContent = false
     @State private var showAllowButton = false
     @State private var showDenyButton = false
+    @State private var isResponding = false
 
     var body: some View {
         HStack(spacing: 12) {
@@ -1080,6 +1081,8 @@ struct ChatApprovalBar: View {
 
             // Deny button
             Button {
+                guard !isResponding else { return }
+                isResponding = true
                 onDeny()
             } label: {
                 Text("Deny")
@@ -1091,11 +1094,14 @@ struct ChatApprovalBar: View {
                     .clipShape(Capsule())
             }
             .buttonStyle(.plain)
+            .disabled(isResponding)
             .opacity(showDenyButton ? 1 : 0)
             .scaleEffect(showDenyButton ? 1 : 0.8)
 
             // Allow button
             Button {
+                guard !isResponding else { return }
+                isResponding = true
                 onApprove()
             } label: {
                 Text("Allow")
@@ -1103,10 +1109,11 @@ struct ChatApprovalBar: View {
                     .foregroundColor(.black)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(Color.white.opacity(0.95))
+                    .background(Color.white.opacity(isResponding ? 0.4 : 0.95))
                     .clipShape(Capsule())
             }
             .buttonStyle(.plain)
+            .disabled(isResponding)
             .opacity(showAllowButton ? 1 : 0)
             .scaleEffect(showAllowButton ? 1 : 0.8)
         }
