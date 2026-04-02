@@ -255,6 +255,10 @@ struct InstanceRow: View {
                             .font(.system(size: 9, weight: .medium, design: .monospaced))
                             .foregroundColor(ctx.usageColor)
 
+                        Text(ctx.formattedTokenCount)
+                            .font(.system(size: 9, design: .monospaced))
+                            .foregroundColor(.white.opacity(0.3))
+
                         if let model = ctx.modelName {
                             Text(model)
                                 .font(.system(size: 9, design: .monospaced))

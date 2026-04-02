@@ -23,6 +23,19 @@ struct ContextUsage: Equatable, Sendable {
         String(format: "$%.2f", totalCostUsd)
     }
 
+    var formattedTokenCount: String {
+        let total = inputTokens + outputTokens
+        if total >= 1_000_000 {
+            return String(format: "%.1fM tokens", Double(total) / 1_000_000)
+        } else if total >= 10_000 {
+            return "\(total / 1_000)k tokens"
+        } else if total >= 1_000 {
+            return String(format: "%.1fk tokens", Double(total) / 1_000)
+        } else {
+            return "\(total) tokens"
+        }
+    }
+
     /// green < 50%, yellow 50-70%, red >= 85%, orange in between
     var usageColor: Color {
         if usedPercentage >= 85 {
