@@ -23,13 +23,31 @@ struct ProcessInfo: Sendable {
 }
 
 /// Builds and queries the system process tree
-struct ProcessTreeBuilder: Sendable {
+final class ProcessTreeBuilder: Sendable {
     nonisolated static let shared = ProcessTreeBuilder()
 
-    private nonisolated init() {}
+    private let lock = NSLock()
+    private struct CachedTree: @unchecked Sendable {
+        let tree: [Int: ProcessInfo]
+        let timestamp: Date
+    }
+    private let _cached = UnsafeMutablePointer<CachedTree?>.allocate(capacity: 1)
+    private static let cacheDuration: TimeInterval = 2.0
 
-    /// Build a process tree mapping PID -> ProcessInfo
+    private nonisolated init() {
+        _cached.initialize(to: nil)
+    }
+
+    /// Build a process tree mapping PID -> ProcessInfo (cached for 2 seconds)
     nonisolated func buildTree() -> [Int: ProcessInfo] {
+        lock.lock()
+        if let cached = _cached.pointee, Date().timeIntervalSince(cached.timestamp) < Self.cacheDuration {
+            let tree = cached.tree
+            lock.unlock()
+            return tree
+        }
+        lock.unlock()
+
         guard let output = ProcessExecutor.shared.runSyncOrNil("/bin/ps", arguments: ["-eo", "pid,ppid,tty,comm"]) else {
             return [:]
         }
@@ -50,6 +68,10 @@ struct ProcessTreeBuilder: Sendable {
 
             tree[pid] = ProcessInfo(pid: pid, ppid: ppid, command: command, tty: tty)
         }
+
+        lock.lock()
+        _cached.pointee = CachedTree(tree: tree, timestamp: Date())
+        lock.unlock()
 
         return tree
     }

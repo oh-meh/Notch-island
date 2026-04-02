@@ -29,6 +29,9 @@ actor SessionStore {
     /// Sync debounce interval (100ms)
     private let syncDebounceNs: UInt64 = 100_000_000
 
+    /// Last published snapshot for change detection
+    private var lastPublishedSessions: [SessionState] = []
+
     // MARK: - Published State (for UI)
 
     /// Publisher for session state changes (nonisolated for Combine subscription from any context)
@@ -976,6 +979,8 @@ actor SessionStore {
 
     private func publishState() {
         let sortedSessions = Array(sessions.values).sorted { $0.projectName < $1.projectName }
+        guard sortedSessions != lastPublishedSessions else { return }
+        lastPublishedSessions = sortedSessions
         sessionsSubject.send(sortedSessions)
     }
 

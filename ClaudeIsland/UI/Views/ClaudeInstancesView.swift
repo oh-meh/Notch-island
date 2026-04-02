@@ -132,7 +132,8 @@ struct InstanceRow: View {
 
     private let claudeOrange = Color(red: 0.85, green: 0.47, blue: 0.34)
     private let spinnerSymbols = ["·", "✢", "✳", "∗", "✻", "✽"]
-    private let spinnerTimer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
+    @State private var spinnerTimerCancellable: AnyCancellable?
+    private let spinnerTimer = Timer.publish(every: 0.15, on: .main, in: .common)
 
     /// Whether we're showing the approval UI
     private var isWaitingForApproval: Bool {
@@ -330,6 +331,8 @@ struct InstanceRow: View {
                 .fill(isHovered ? Color.white.opacity(0.06) : Color.clear)
         )
         .onHover { isHovered = $0 }
+        .onAppear { spinnerTimerCancellable = spinnerTimer.connect() as? AnyCancellable }
+        .onDisappear { spinnerTimerCancellable?.cancel() }
         .task {
             isYabaiAvailable = await WindowFinder.shared.isYabaiAvailable()
         }

@@ -14,9 +14,10 @@ struct ClaudeCrabIcon: View {
     var animateLegs: Bool = false
 
     @State private var legPhase: Int = 0
+    @State private var legTimerCancellable: AnyCancellable?
 
     // Timer for leg animation
-    private let legTimer = Timer.publish(every: 0.15, on: .main, in: .common).autoconnect()
+    private let legTimer = Timer.publish(every: 0.15, on: .main, in: .common)
 
     init(size: CGFloat = 16, color: Color = Color(red: 0.85, green: 0.47, blue: 0.34), animateLegs: Bool = false) {
         self.size = size
@@ -89,6 +90,8 @@ struct ClaudeCrabIcon: View {
                 legPhase = (legPhase + 1) % 4
             }
         }
+        .onAppear { legTimerCancellable = legTimer.connect() as? AnyCancellable }
+        .onDisappear { legTimerCancellable?.cancel() }
     }
 }
 

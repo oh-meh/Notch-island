@@ -588,7 +588,8 @@ struct ProcessingIndicatorView: View {
     private let baseText: String
 
     @State private var dotCount: Int = 1
-    private let timer = Timer.publish(every: 0.4, on: .main, in: .common).autoconnect()
+    @State private var timerCancellable: AnyCancellable?
+    private let timer = Timer.publish(every: 0.4, on: .main, in: .common)
 
     /// Use a turnId to select text consistently per user turn
     init(turnId: String = "") {
@@ -615,6 +616,8 @@ struct ProcessingIndicatorView: View {
         .onReceive(timer) { _ in
             dotCount = (dotCount % 3) + 1
         }
+        .onAppear { timerCancellable = timer.connect() as? AnyCancellable }
+        .onDisappear { timerCancellable?.cancel() }
     }
 }
 
