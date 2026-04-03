@@ -121,14 +121,21 @@ actor SessionStore {
         // StatusUpdate events only update context usage, not phase/tools
         if event.event == "StatusUpdate" {
             guard var session = sessions[event.sessionId] else { return }
-            session.contextUsage = ContextUsage(
+            let newInput = event.ctxInputTokens ?? 0
+            let newOutput = event.ctxOutputTokens ?? 0
+            let prevCumulativeIn = session.contextUsage?.cumulativeInputTokens ?? 0
+            let prevCumulativeOut = session.contextUsage?.cumulativeOutputTokens ?? 0
+            var usage = ContextUsage(
                 contextWindowSize: event.ctxWindowSize ?? 200_000,
                 usedPercentage: event.ctxUsedPercentage ?? 0,
-                inputTokens: event.ctxInputTokens ?? 0,
-                outputTokens: event.ctxOutputTokens ?? 0,
+                inputTokens: newInput,
+                outputTokens: newOutput,
                 totalCostUsd: event.ctxTotalCostUsd ?? 0,
-                modelName: event.ctxModelName
+                modelName: event.ctxModelName,
+                cumulativeInputTokens: max(newInput, prevCumulativeIn),
+                cumulativeOutputTokens: max(newOutput, prevCumulativeOut)
             )
+            session.contextUsage = usage
             session.lastActivity = Date()
             sessions[event.sessionId] = session
             publishState()

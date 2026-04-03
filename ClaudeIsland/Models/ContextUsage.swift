@@ -15,6 +15,10 @@ struct ContextUsage: Equatable, Sendable {
     var totalCostUsd: Double
     var modelName: String?
 
+    /// Cumulative token counts (only ever increase, survive context compression)
+    var cumulativeInputTokens: Int
+    var cumulativeOutputTokens: Int
+
     var formattedPercentage: String {
         "\(Int(usedPercentage))%"
     }
@@ -24,7 +28,7 @@ struct ContextUsage: Equatable, Sendable {
     }
 
     var formattedTokenCount: String {
-        let total = inputTokens + outputTokens
+        let total = cumulativeInputTokens + cumulativeOutputTokens
         if total >= 1_000_000 {
             return String(format: "%.1fM tokens", Double(total) / 1_000_000)
         } else if total >= 10_000 {
