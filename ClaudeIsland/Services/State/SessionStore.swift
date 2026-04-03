@@ -123,17 +123,22 @@ actor SessionStore {
             guard var session = sessions[event.sessionId] else { return }
             let newInput = event.ctxInputTokens ?? 0
             let newOutput = event.ctxOutputTokens ?? 0
+            let prevInput = session.contextUsage?.inputTokens ?? 0
+            let prevOutput = session.contextUsage?.outputTokens ?? 0
             let prevCumulativeIn = session.contextUsage?.cumulativeInputTokens ?? 0
             let prevCumulativeOut = session.contextUsage?.cumulativeOutputTokens ?? 0
-            var usage = ContextUsage(
+            // Accumulate positive deltas so the count grows even after context compression
+            let inputDelta = max(0, newInput - prevInput)
+            let outputDelta = max(0, newOutput - prevOutput)
+            let usage = ContextUsage(
                 contextWindowSize: event.ctxWindowSize ?? 200_000,
                 usedPercentage: event.ctxUsedPercentage ?? 0,
                 inputTokens: newInput,
                 outputTokens: newOutput,
                 totalCostUsd: event.ctxTotalCostUsd ?? 0,
                 modelName: event.ctxModelName,
-                cumulativeInputTokens: max(newInput, prevCumulativeIn),
-                cumulativeOutputTokens: max(newOutput, prevCumulativeOut)
+                cumulativeInputTokens: prevCumulativeIn + inputDelta,
+                cumulativeOutputTokens: prevCumulativeOut + outputDelta
             )
             session.contextUsage = usage
             session.lastActivity = Date()
